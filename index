@@ -1,0 +1,820 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Asistencia del equipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --ink:#18212D; --muted:#5C6776; --line:#D9DEE6; --soft:#EBEFF4;
+  --inj:#B42318; --inj-soft:#FDE7E4; --jus:#11756A; --jus-soft:#DCF1ED; --acc:#2F4AA8; --acc-ink:#FFFFFF; --warn:#9A6700; --warn-soft:#FFF3D6;
+  --we:#E6EAF0;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#10151C; --surface:#18202A; --ink:#E8EDF3; --muted:#9AA6B5; --line:#2C3744; --soft:#212B37;
+    --inj:#F2735F; --inj-soft:#3A1D1A; --jus:#4CC2B0; --jus-soft:#12302C; --acc:#8EA2F0; --acc-ink:#0E1420; --warn:#E8B44C; --warn-soft:#33290F;
+    --we:#1F2833; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#10151C; --surface:#18202A; --ink:#E8EDF3; --muted:#9AA6B5; --line:#2C3744; --soft:#212B37;
+  --inj:#F2735F; --inj-soft:#3A1D1A; --jus:#4CC2B0; --jus-soft:#12302C; --acc:#8EA2F0; --acc-ink:#0E1420; --warn:#E8B44C; --warn-soft:#33290F;
+  --we:#1F2833; color-scheme:dark;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 120px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-in{max-width:1120px;margin:0 auto;padding:14px 20px 0;display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 24px}
+.brand{display:flex;flex-direction:column;padding-bottom:12px}
+.brand h1{margin:0;font-size:1.35rem;line-height:1.2;letter-spacing:-.01em}
+.brand small{color:var(--muted);font-size:.85rem}
+.brand small .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--jus);margin-right:6px;vertical-align:1px}
+.brand small.off .dot{background:var(--warn)}
+nav.tabs{display:flex;gap:2px;margin-left:auto;overflow-x:auto;max-width:100%}
+nav.tabs button{background:none;border:0;padding:10px 14px 12px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap;font-weight:700}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+nav.tabs button:hover{color:var(--ink)}
+
+main{max-width:1120px;margin:0 auto;padding:24px 20px 64px}
+section.view{display:none}
+section.view.on{display:block}
+h2{font-size:1.25rem;margin:0 0 4px}
+h3{font-size:1.05rem;margin:0 0 10px}
+p.lead{margin:0 0 20px;color:var(--muted);max-width:68ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:18px 20px;margin-bottom:18px}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.spread{justify-content:space-between}
+.muted{color:var(--muted)}
+.small{font-size:.875rem}
+
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--surface)}
+.seg button{border:0;background:none;padding:7px 12px;cursor:pointer;color:var(--muted);font-size:.9rem}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+
+.ledger{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:16px 0 18px;overflow:hidden}
+.ledger div{padding:14px 18px}
+.ledger div+div{border-left:1px solid var(--line)}
+.ledger b{display:block;font-size:1.6rem;line-height:1.1}
+.ledger span{color:var(--muted);font-size:.875rem}
+.ledger .i b{color:var(--inj)} .ledger .j b{color:var(--jus)}
+@media (max-width:720px){.ledger{grid-template-columns:repeat(2,1fr)}.ledger div:nth-child(3){border-left:0}.ledger div:nth-child(n+3){border-top:1px solid var(--line)}}
+
+/* Tira de asistencia */
+.tira-wrap{overflow-x:auto}
+.tira{min-width:calc(170px + var(--n) * 8px)}
+.tira-row{display:grid;grid-template-columns:170px repeat(var(--n),minmax(6px,1fr));gap:2px;align-items:center;margin-bottom:3px}
+.tira-row .nm{font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:10px}
+.tira-head .nm{color:var(--muted)}
+.c{height:16px;border-radius:2px;background:var(--soft)}
+.c.we{background:transparent;outline:1px solid var(--we);outline-offset:-1px}
+.c.i{background:var(--inj)} .c.j{background:var(--jus)}
+.mlab{font-size:.75rem;color:var(--muted);white-space:nowrap;overflow:visible;height:16px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.85rem;color:var(--muted);margin-top:10px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:6px}
+
+.grid2{display:grid;grid-template-columns:3fr 2fr;gap:18px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+svg.chart{width:100%;height:auto;display:block}
+svg .ax{fill:var(--muted);font-size:11px;font-family:inherit}
+svg .gl{stroke:var(--line);stroke-width:1}
+svg .bi{fill:var(--inj)} svg .bj{fill:var(--jus)}
+.hbar{display:grid;grid-template-columns:minmax(110px,1fr) 2fr 34px;gap:10px;align-items:center;font-size:.9rem;margin-bottom:6px}
+.hbar .tr{height:10px;background:var(--soft);border-radius:5px;overflow:hidden}
+.hbar .tr span{display:block;height:100%;background:var(--jus)}
+.hbar.inj .tr span{background:var(--inj)}
+
+/* Tablas */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.92rem}
+th{text-align:left;font-weight:700;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right}
+.chip{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.8rem;font-weight:700;white-space:nowrap}
+.chip.com{background:var(--inj-soft);color:var(--inj)}
+.chip.seg{background:var(--warn-soft);color:var(--warn)}
+.chip.jus{background:var(--jus-soft);color:var(--jus)}
+.chip.obs{background:var(--soft);color:var(--ink)}
+.chip.ok{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.tag-i{color:var(--inj);font-weight:700} .tag-j{color:var(--jus);font-weight:700}
+
+.alert-list{display:flex;flex-direction:column;gap:0}
+.alert-item{display:flex;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.alert-item:first-child{border-top:0;padding-top:0}
+.alert-item .who{flex:1;min-width:0}
+.alert-item .who b{display:block}
+.alert-item .who span{color:var(--muted);font-size:.875rem}
+@media (max-width:600px){.alert-item{flex-wrap:wrap}}
+
+/* Formularios */
+.fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 16px}
+label.f{display:flex;flex-direction:column;gap:5px;font-weight:700;font-size:.9rem}
+label.f span.h{font-weight:400;color:var(--muted);font-size:.8rem}
+input[type=text],input[type=email],input[type=date],input[type=number],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:9px 11px;width:100%;min-width:0}
+textarea{resize:vertical}
+.radios{display:flex;gap:8px;flex-wrap:wrap}
+.radios label{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer;font-weight:700;background:var(--bg)}
+.radios label:has(input:checked).ri{border-color:var(--inj);background:var(--inj-soft);color:var(--inj)}
+.radios label:has(input:checked).rj{border-color:var(--jus);background:var(--jus-soft);color:var(--jus)}
+.check{display:flex;align-items:center;gap:8px;font-weight:400}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:9px 16px;cursor:pointer;font-weight:700}
+.btn:hover{border-color:var(--ink)}
+a.btn{text-decoration:none;display:inline-flex;align-items:center;color:inherit}
+a.btn.pri{color:var(--acc-ink)}
+.campo{margin-bottom:14px}
+input[readonly]{color:var(--muted)}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.sm{padding:5px 11px;font-size:.85rem}
+.btn.link{border:0;background:none;padding:4px 6px;color:var(--acc)}
+.btn.danger{color:var(--inj)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+details summary{cursor:pointer;font-weight:700}
+details[open] summary{margin-bottom:12px}
+.empty{padding:28px 10px;text-align:center;color:var(--muted)}
+.empty .btn{margin-top:10px}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 14px;font-size:.9rem;margin-bottom:16px;display:none}
+.note.on{display:block}
+#c-texto{min-height:460px;font-size:.95rem;line-height:1.6;background:var(--surface)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--surface);padding:10px 18px;border-radius:8px;font-size:.92rem;opacity:0;pointer-events:none;transition:opacity .2s;z-index:20;max-width:90vw}
+.toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+.hist-item{padding:10px 0;border-top:1px solid var(--line)}
+.hist-item:first-child{border-top:0}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <h1>Asistencia del equipo</h1>
+      <small id="estado-guardado"><span class="dot"></span>Conectando…</small>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button role="tab" data-v="resumen" aria-selected="true">Resumen</button>
+      <button role="tab" data-v="registrar" aria-selected="false">Registrar ausencia</button>
+      <button role="tab" data-v="empleados" aria-selected="false">Empleados</button>
+      <button role="tab" data-v="comunicados" aria-selected="false">Comunicados</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="note" id="nota-memoria">No se pudo acceder al almacenamiento del navegador (¿modo incógnito?). Los datos se perderán al cerrar la página.</div>
+
+  <!-- RESUMEN -->
+  <section class="view on" id="v-resumen" role="tabpanel">
+    <div class="row spread">
+      <div>
+        <h2>Resumen de ausencias</h2>
+        <p class="lead" style="margin-bottom:0" id="r-sub">Quién ha faltado, cuántas veces y con qué justificación.</p>
+      </div>
+      <div class="seg" id="r-periodo" role="group" aria-label="Periodo"></div>
+    </div>
+    <div id="r-cuerpo"></div>
+
+    <details class="panel" id="ajustes">
+      <summary>Ajustes y copias de seguridad</summary>
+      <div class="fgrid">
+        <label class="f">Seguimiento desde<span class="h">ausencias sin justificar en el periodo</span><input type="number" min="1" id="cfg-seg"></label>
+        <label class="f">Comunicado formal desde<span class="h">ausencias sin justificar en el periodo</span><input type="number" min="1" id="cfg-com"></label>
+        <label class="f">Revisar ausentismo desde<span class="h">ausencias justificadas en el periodo</span><input type="number" min="1" id="cfg-jus"></label>
+      </div>
+      <label class="check" style="margin-top:14px"><input type="checkbox" id="cfg-sab"> En la empresa se trabaja los sábados</label>
+      <div class="actions">
+        <button class="btn pri" id="cfg-guardar">Guardar ajustes</button>
+        <button class="btn" id="exportar">Exportar ausencias (CSV)</button>
+      </div>
+      <h3 style="margin-top:22px">Copia de seguridad</h3>
+      <p class="small muted" style="margin:0 0 4px">Los datos viven solo en este navegador. Si se borra el historial del navegador o cambias de computador, se pierden. Descarga una copia con frecuencia y guárdala en un lugar seguro (no en GitHub).</p>
+      <p class="small muted" id="ultimo-respaldo" style="margin:0"></p>
+      <div class="actions">
+        <button class="btn" id="respaldo-bajar">Descargar copia de seguridad</button>
+        <label class="btn" for="respaldo-subir" style="display:inline-flex;align-items:center">Restaurar desde copia</label>
+        <input type="file" id="respaldo-subir" accept=".json,application/json" hidden>
+      </div>
+    </details>
+  </section>
+
+  <!-- REGISTRAR -->
+  <section class="view" id="v-registrar" role="tabpanel">
+    <h2 id="a-titulo">Registrar ausencia</h2>
+    <p class="lead">Anota cada falta el mismo día. Si después llega un soporte, edita el registro y cámbialo a justificada.</p>
+    <form class="panel" id="f-aus" novalidate>
+      <div class="fgrid">
+        <label class="f">Empleado<select id="a-emp" required></select></label>
+        <label class="f">Desde<input type="date" id="a-desde" required></label>
+        <label class="f">Hasta<span class="h">si fue un solo día, deja la misma fecha</span><input type="date" id="a-hasta"></label>
+      </div>
+      <div style="margin-top:16px">
+        <div style="font-weight:700;font-size:.9rem;margin-bottom:6px">Tipo de ausencia</div>
+        <div class="radios">
+          <label class="ri"><input type="radio" name="a-tipo" value="injustificada" checked> Sin justificar</label>
+          <label class="rj"><input type="radio" name="a-tipo" value="justificada"> Justificada</label>
+        </div>
+      </div>
+      <div class="fgrid" id="a-jus-campos" style="margin-top:16px;display:none">
+        <label class="f">Motivo<select id="a-motivo">
+          <option>Incapacidad médica</option><option>Cita médica</option><option>Calamidad doméstica</option>
+          <option>Licencia (luto, maternidad, paternidad…)</option><option>Permiso concedido</option><option>Diligencia legal o judicial</option><option>Otro</option>
+        </select></label>
+        <label class="check" style="align-self:end;padding-bottom:10px"><input type="checkbox" id="a-soporte"> Entregó soporte</label>
+      </div>
+      <label class="f" style="margin-top:16px">Observaciones<span class="h">opcional: cómo avisó, a quién, qué dijo</span><textarea id="a-obs" rows="2"></textarea></label>
+      <div class="actions">
+        <button class="btn pri" type="submit" id="a-guardar">Guardar ausencia</button>
+        <button class="btn" type="button" id="a-cancelar" hidden>Cancelar edición</button>
+      </div>
+    </form>
+
+    <div class="panel">
+      <div class="row spread" style="margin-bottom:10px">
+        <h3 style="margin:0">Registros</h3>
+        <div class="row">
+          <select id="fa-emp" aria-label="Filtrar por empleado" style="width:auto"></select>
+          <select id="fa-tipo" aria-label="Filtrar por tipo" style="width:auto">
+            <option value="">Todos los tipos</option><option value="injustificada">Sin justificar</option><option value="justificada">Justificadas</option>
+          </select>
+        </div>
+      </div>
+      <div id="lista-aus"></div>
+    </div>
+  </section>
+
+  <!-- EMPLEADOS -->
+  <section class="view" id="v-empleados" role="tabpanel">
+    <h2 id="e-titulo">Empleados</h2>
+    <p class="lead">Tu equipo. Si alguien se retira, desactívalo para conservar su historial.</p>
+    <form class="panel" id="f-emp" novalidate>
+      <div class="fgrid">
+        <label class="f">Nombre completo<input type="text" id="e-nombre" required autocomplete="off"></label>
+        <label class="f">Documento<input type="text" id="e-doc" autocomplete="off"></label>
+        <label class="f">Cargo<input type="text" id="e-cargo" autocomplete="off"></label>
+        <label class="f">Área<input type="text" id="e-area" autocomplete="off"></label>
+        <label class="f">Correo<input type="email" id="e-correo" autocomplete="off"></label>
+      </div>
+      <div class="actions">
+        <button class="btn pri" type="submit" id="e-guardar">Agregar empleado</button>
+        <button class="btn" type="button" id="e-cancelar" hidden>Cancelar edición</button>
+      </div>
+      <details style="margin-top:18px">
+        <summary>Agregar varios a la vez</summary>
+        <label class="f">Una persona por línea<span class="h">Formato: Nombre; Cargo; Área; Correo (solo el nombre es obligatorio). Puedes pegar desde Excel.</span>
+          <textarea id="e-lote" rows="5" placeholder="Ana María Pérez; Analista; Contabilidad; ana@empresa.com&#10;Carlos Rojas; Operario; Producción"></textarea></label>
+        <div class="actions"><button class="btn" type="button" id="e-lote-btn">Agregar lista</button></div>
+      </details>
+    </form>
+    <div class="panel"><div id="lista-emp"></div></div>
+  </section>
+
+  <!-- COMUNICADOS -->
+  <section class="view" id="v-comunicados" role="tabpanel">
+    <h2>Comunicados de Talento Humano</h2>
+    <p class="lead">Elige a la persona y el tipo de comunicado. El borrador se arma con sus fechas reales y se abre en tu Gmail, dirigido al correo registrado de la persona. Revísalo antes de enviarlo.</p>
+    <div class="panel">
+      <div class="fgrid">
+        <label class="f">Empleado<select id="c-emp"></select></label>
+        <label class="f">Tipo de comunicado<select id="c-tipo">
+          <option value="recordatorio">Recordatorio de asistencia</option>
+          <option value="descargos">Citación a descargos</option>
+          <option value="justificadas">Seguimiento de ausencias justificadas</option>
+        </select></label>
+        <label class="f">Periodo a incluir<select id="c-per"></select></label>
+      </div>
+      <p class="small muted" id="c-sugerencia" style="margin:12px 0 0"></p>
+      <div class="actions"><button class="btn pri" id="c-generar">Generar borrador</button></div>
+    </div>
+
+    <div class="panel" id="c-editor" hidden>
+      <label class="f campo">Para<input type="text" id="c-para" readonly></label>
+      <label class="f campo">Asunto<input type="text" id="c-asunto"></label>
+      <label class="f" for="c-texto">Mensaje<span class="h">puedes editarlo aquí mismo</span></label>
+      <textarea id="c-texto" style="margin-top:6px"></textarea>
+      <div class="actions">
+        <a class="btn pri" id="c-gmail" href="https://mail.google.com/" target="_blank" rel="noopener">Abrir en Gmail</a>
+        <button class="btn" id="c-copiar">Copiar texto</button>
+        <button class="btn" id="c-descargar" hidden>Descargar .txt</button>
+        <button class="btn" id="c-registrar">Marcar como enviado</button>
+      </div>
+      <p class="small muted" style="margin:12px 0 0">Antes de enviar una citación a descargos, confirma que el procedimiento coincide con tu Reglamento Interno de Trabajo.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Comunicados enviados</h3>
+      <div id="c-hist"></div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pad=n=>String(n).padStart(2,"0");
+const toS=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const parse=s=>{const p=String(s).split("-").map(Number);return new Date(p[0],p[1]-1,p[2]);};
+const addD=(s,n)=>{const d=parse(s);d.setDate(d.getDate()+n);return toS(d);};
+const hoy=()=>toS(new Date());
+const MESES=["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+const MC=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+const DIAS=["domingo","lunes","martes","miércoles","jueves","viernes","sábado"];
+const fmt=s=>{const d=parse(s);return d.getDate()+" "+MC[d.getMonth()]+" "+d.getFullYear();};
+const fmtL=s=>{const d=parse(s);return DIAS[d.getDay()]+" "+d.getDate()+" de "+MESES[d.getMonth()]+" de "+d.getFullYear();};
+const nid=()=>(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+const PER={"30":"Últimos 30 días","90":"Últimos 90 días","anio":"Este año","todo":"Todo el historial"};
+const TIPOS={recordatorio:"Recordatorio de asistencia",descargos:"Citación a descargos",justificadas:"Seguimiento de ausencias justificadas"};
+
+const DEF_CFG={umbralSeg:2,umbralCom:3,umbralJust:4,sabados:false,empresa:"",ciudad:"",firmante:"",cargo:"Talento Humano"};
+const S={emp:[],abs:[],com:[],cfg:Object.assign({},DEF_CFG),period:"90"};
+let db=null,sample=null,downloads=null;
+const COL={empleados:"emp",ausencias:"abs",comunicados:"com"};
+
+/* ---------- utilidades ---------- */
+let tt;
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),3200);}
+function cfg(){return Object.assign({},DEF_CFG,S.cfg);}
+function empById(id){return S.emp.find(e=>e.id===id);}
+function nombreOrd(a,b){return String(a.nombre||"").localeCompare(String(b.nombre||""),"es");}
+
+async function guardar(col,id,data){
+  if(db){await db.collection(col).doc(id).set(data);}
+  else{const arr=S[COL[col]];const i=arr.findIndex(x=>x.id===id);const o=Object.assign({id},data);if(i>=0)arr[i]=o;else arr.push(o);persistir();render();}
+}
+async function borrar(col,id){
+  if(db){await db.collection(col).doc(id).delete();}
+  else{S[COL[col]]=S[COL[col]].filter(x=>x.id!==id);persistir();render();}
+}
+async function guardarCfg(nuevo){
+  const c=Object.assign(cfg(),nuevo);
+  S.cfg=c;persistir();render();
+}
+function limpio(o){const r={};Object.keys(o).forEach(k=>{if(k!=="id")r[k]=o[k];});return r;}
+function fallo(e){console.error(e);toast(e&&e.code==="invalid_argument"?"No tienes permiso para modificar estos datos.":"No se pudo guardar. Intenta de nuevo.");}
+
+/* ---------- cálculo ---------- */
+function diasDe(a){
+  const out=[];const fin=a.hasta&&a.hasta>=a.desde?a.hasta:a.desde;let s=a.desde,g=0;const sab=cfg().sabados;
+  while(s<=fin&&g<400){const w=parse(s).getDay();if(w!==0&&(w!==6||sab))out.push(s);s=addD(s,1);g++;}
+  if(!out.length)out.push(a.desde);
+  return out;
+}
+function inicio(p){const t=hoy();if(p==="30")return addD(t,-29);if(p==="90")return addD(t,-89);if(p==="anio")return t.slice(0,4)+"-01-01";return "0000-01-01";}
+function analizar(p){
+  const ini=inicio(p);const m=new Map();
+  S.emp.forEach(e=>m.set(e.id,{emp:e,inj:[],jus:[],dInj:0,dJus:0,pegadas:0}));
+  const regs=[];
+  S.abs.forEach(a=>{
+    const r=m.get(a.empleadoId);if(!r)return;
+    const d=diasDe(a).filter(x=>x>=ini);if(!d.length)return;
+    const it=Object.assign({},a,{dias:d});regs.push(it);
+    if(a.tipo==="injustificada"){
+      r.inj.push(it);r.dInj+=d.length;
+      const w1=parse(a.desde).getDay(),w2=parse(a.hasta||a.desde).getDay();
+      if(w1===1||w2===(cfg().sabados?6:5))r.pegadas++;
+    }else{r.jus.push(it);r.dJus+=d.length;}
+  });
+  m.forEach(r=>{r.inj.sort((x,y)=>x.desde.localeCompare(y.desde));r.jus.sort((x,y)=>x.desde.localeCompare(y.desde));r.est=estado(r);});
+  return {ini,regs,filas:[...m.values()]};
+}
+function estado(r){const c=cfg();
+  if(r.inj.length>=c.umbralCom)return{k:"com",t:"Enviar comunicado",tipo:"descargos"};
+  if(r.inj.length>=c.umbralSeg)return{k:"seg",t:"En seguimiento",tipo:"recordatorio"};
+  if(r.jus.length>=c.umbralJust)return{k:"jus",t:"Revisar ausentismo",tipo:"justificadas"};
+  if(r.inj.length)return{k:"obs",t:"1 falta sin justificar",tipo:"recordatorio"};
+  return{k:"ok",t:"Sin alertas",tipo:null};
+}
+const RANGO={com:0,seg:1,jus:2,obs:3,ok:4};
+function ultimoCom(empId){return S.com.filter(c=>c.empleadoId===empId).sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)))[0];}
+
+/* ---------- navegación ---------- */
+const VISTAS=["resumen","registrar","empleados","comunicados"];
+function ir(v,push){
+  if(!VISTAS.includes(v))v="resumen";
+  $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.v===v)));
+  $$("section.view").forEach(s=>s.classList.toggle("on",s.id==="v-"+v));
+  if(push!==false){try{history.replaceState(null,"","#"+v);}catch(e){}}
+  window.scrollTo(0,0);
+}
+$$("nav.tabs button").forEach(b=>b.addEventListener("click",()=>ir(b.dataset.v)));
+window.addEventListener("hashchange",()=>ir(location.hash.slice(1),false));
+
+/* ---------- RESUMEN ---------- */
+function renderPeriodo(){
+  $("#r-periodo").innerHTML=Object.keys(PER).map(k=>`<button data-p="${k}" aria-pressed="${k===S.period}">${PER[k].replace("Últimos ","").replace("Todo el historial","Todo")}</button>`).join("");
+}
+$("#r-periodo").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;S.period=b.dataset.p;render();});
+
+function renderResumen(){
+  renderPeriodo();
+  const box=$("#r-cuerpo");
+  if(!S.emp.length){
+    box.innerHTML=`<div class="panel" style="margin-top:18px"><div class="empty">Todavía no hay empleados registrados.<br><button class="btn pri" data-ir="empleados">Agregar empleados</button></div></div>`;
+    return;
+  }
+  const A=analizar(S.period);
+  const filas=A.filas.filter(r=>r.emp.activo!==false||r.inj.length||r.jus.length);
+  const nI=filas.reduce((s,r)=>s+r.inj.length,0),dI=filas.reduce((s,r)=>s+r.dInj,0);
+  const nJ=filas.reduce((s,r)=>s+r.jus.length,0),dJ=filas.reduce((s,r)=>s+r.dJus,0);
+  const alertas=filas.filter(r=>["com","seg","jus"].includes(r.est.k)).sort((a,b)=>RANGO[a.est.k]-RANGO[b.est.k]||b.inj.length-a.inj.length);
+  const pct=(nI+nJ)?Math.round(nI*100/(nI+nJ)):0;
+  $("#r-sub").textContent=PER[S.period]+(S.period!=="todo"?" · desde el "+fmt(A.ini):"");
+
+  let h=`<div class="ledger num">
+    <div class="i"><b>${nI}</b><span>sin justificar · ${dI} ${dI===1?"día":"días"}</span></div>
+    <div class="j"><b>${nJ}</b><span>justificadas · ${dJ} ${dJ===1?"día":"días"}</span></div>
+    <div><b>${pct}%</b><span>de las ausencias sin justificar</span></div>
+    <div><b>${alertas.length}</b><span>${alertas.length===1?"persona requiere":"personas requieren"} atención</span></div>
+  </div>`;
+
+  h+=`<div class="panel"><h3>Necesitan atención</h3>`;
+  if(!alertas.length)h+=`<p class="muted" style="margin:0">Nadie supera los umbrales de alerta en este periodo.</p>`;
+  else h+=`<div class="alert-list">`+alertas.map(r=>{
+    const u=ultimoCom(r.emp.id);
+    const det=[];if(r.inj.length)det.push(`${r.inj.length} sin justificar`);if(r.jus.length)det.push(`${r.jus.length} justificadas`);if(r.pegadas)det.push(`${r.pegadas} pegadas al fin de semana`);
+    return `<div class="alert-item"><span class="chip ${r.est.k}">${esc(r.est.t)}</span>
+      <div class="who"><b>${esc(r.emp.nombre)}</b><span>${esc(det.join(", "))}${u?` · último comunicado: ${fmt(u.fecha)}`:""}</span></div>
+      <button class="btn sm" data-preparar="${esc(r.emp.id)}" data-tipo="${r.est.tipo}">Preparar comunicado</button></div>`;
+  }).join("")+`</div>`;
+  h+=`</div>`;
+
+  h+=`<div class="panel"><h3>Tira de asistencia</h3>${tira(A,filas)}</div>`;
+  h+=`<div class="grid2"><div class="panel"><h3>Días de ausencia por mes</h3>${grafMeses()}</div>
+      <div class="panel"><h3>Días de la semana</h3>${grafSemana(A)}</div></div>`;
+  h+=`<div class="panel"><h3>Motivos</h3>${motivos(A)}</div>`;
+
+  const orden=[...filas].sort((a,b)=>RANGO[a.est.k]-RANGO[b.est.k]||b.inj.length-a.inj.length||b.jus.length-a.jus.length||nombreOrd(a.emp,b.emp));
+  h+=`<div class="panel"><h3>Por empleado</h3><div class="tbl-wrap"><table class="num"><thead><tr>
+    <th>Empleado</th><th>Área</th><th class="n">Sin justificar</th><th class="n">Días</th><th class="n">Justificadas</th><th class="n">Días</th><th>Estado</th></tr></thead><tbody>`+
+    orden.map(r=>`<tr><td>${esc(r.emp.nombre)}${r.emp.activo===false?' <span class="muted small">(inactivo)</span>':""}</td><td class="muted">${esc(r.emp.area||"")}</td>
+      <td class="n ${r.inj.length?"tag-i":""}">${r.inj.length}</td><td class="n">${r.dInj}</td>
+      <td class="n ${r.jus.length?"tag-j":""}">${r.jus.length}</td><td class="n">${r.dJus}</td>
+      <td><span class="chip ${r.est.k}">${esc(r.est.t)}</span></td></tr>`).join("")+`</tbody></table></div></div>`;
+  box.innerHTML=h;
+}
+function tira(A,filas){
+  const fin=hoy();let ini=A.ini;const tope=addD(fin,-90);if(ini<tope)ini=tope;
+  const dias=[];for(let s=ini;s<=fin;s=addD(s,1))dias.push(s);
+  const mapa=new Map();
+  S.abs.forEach(a=>{diasDe(a).forEach(d=>{if(d<ini||d>fin)return;if(!mapa.has(a.empleadoId))mapa.set(a.empleadoId,new Map());const mm=mapa.get(a.empleadoId);if(mm.get(d)!=="i")mm.set(d,a.tipo==="injustificada"?"i":"j");});});
+  const sab=cfg().sabados;
+  const head=`<div class="tira-row tira-head"><div class="nm small">${dias.length<91?"":"Últimos 3 meses"}</div>`+dias.map((d,i)=>{const dd=parse(d);return (i===0||dd.getDate()===1)?`<div class="mlab" style="grid-column:span 1">${MC[dd.getMonth()]}</div>`:`<div></div>`;}).join("")+`</div>`;
+  const orden=[...filas].sort((a,b)=>b.inj.length-a.inj.length||b.jus.length-a.jus.length||nombreOrd(a.emp,b.emp));
+  const rows=orden.map(r=>{const mm=mapa.get(r.emp.id)||new Map();
+    return `<div class="tira-row"><div class="nm" title="${esc(r.emp.nombre)}">${esc(r.emp.nombre)}</div>`+dias.map(d=>{const w=parse(d).getDay();const t=mm.get(d);const we=(w===0||(w===6&&!sab));
+      const lab=t?(t==="i"?"sin justificar":"justificada"):"";
+      return `<div class="c${we?" we":""}${t?" "+t:""}"${t?` title="${fmtL(d)}: ${lab}"`:""}></div>`;}).join("")+`</div>`;}).join("");
+  return `<div class="tira-wrap"><div class="tira" style="--n:${dias.length}">${head}${rows}</div></div>
+    <div class="legend"><span><i style="background:var(--inj)"></i>Sin justificar</span><span><i style="background:var(--jus)"></i>Justificada</span><span><i style="background:var(--soft)"></i>Asistió</span><span><i style="outline:1px solid var(--line);outline-offset:-1px"></i>No laborable</span></div>`;
+}
+function barras(cats,W,H){
+  const pl=26,pb=22,pt=8,iw=W-pl,ih=H-pb-pt;const max=Math.max(1,...cats.map(c=>c.i+c.j));
+  const paso=max<=5?1:max<=10?2:max<=25?5:Math.ceil(max/50)*10;const top=Math.ceil(max/paso)*paso;
+  const bw=iw/cats.length;let g="";
+  for(let v=0;v<=top;v+=paso){const y=pt+ih-(v/top)*ih;g+=`<line class="gl" x1="${pl}" x2="${W}" y1="${y}" y2="${y}"/><text class="ax" x="${pl-6}" y="${y+4}" text-anchor="end">${v}</text>`;}
+  cats.forEach((c,k)=>{const x=pl+k*bw+bw*.2,w=bw*.6;const hj=(c.j/top)*ih,hi=(c.i/top)*ih;const y0=pt+ih;
+    if(c.j)g+=`<rect class="bj" x="${x}" y="${y0-hj}" width="${w}" height="${hj}" rx="2"><title>${c.l}: ${c.j} justificadas</title></rect>`;
+    if(c.i)g+=`<rect class="bi" x="${x}" y="${y0-hj-hi}" width="${w}" height="${hi}" rx="2"><title>${c.l}: ${c.i} sin justificar</title></rect>`;
+    g+=`<text class="ax" x="${x+w/2}" y="${H-6}" text-anchor="middle">${c.l}</text>`;});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfico de barras">${g}</svg>`;
+}
+function grafMeses(){
+  const t=parse(hoy());const ms=[];
+  for(let i=11;i>=0;i--){const d=new Date(t.getFullYear(),t.getMonth()-i,1);ms.push({k:d.getFullYear()+"-"+pad(d.getMonth()+1),l:MC[d.getMonth()],i:0,j:0});}
+  const ids=new Set(S.emp.map(e=>e.id));
+  S.abs.forEach(a=>{if(!ids.has(a.empleadoId))return;diasDe(a).forEach(d=>{const m=ms.find(x=>x.k===d.slice(0,7));if(m){if(a.tipo==="injustificada")m.i++;else m.j++;}});});
+  return barras(ms,620,210)+`<p class="small muted" style="margin:6px 0 0">Últimos 12 meses, sin importar el periodo elegido.</p>`;
+}
+function grafSemana(A){
+  const sab=cfg().sabados;const cats=[1,2,3,4,5].concat(sab?[6]:[]).map(w=>({w,l:DIAS[w].slice(0,3),i:0,j:0}));
+  A.regs.forEach(a=>a.dias.forEach(d=>{const c=cats.find(x=>x.w===parse(d).getDay());if(c){if(a.tipo==="injustificada")c.i++;else c.j++;}}));
+  const tot=cats.reduce((s,c)=>s+c.i,0);const top=[...cats].sort((a,b)=>b.i-a.i)[0];
+  const txt=tot&&top.i/tot>=.35&&tot>=3?`<p class="small muted" style="margin:6px 0 0">El ${DIAS[top.w]} concentra ${Math.round(top.i*100/tot)}% de las faltas sin justificar.</p>`:"";
+  return barras(cats,360,210)+txt;
+}
+function motivos(A){
+  const m=new Map();let inj=0;
+  A.regs.forEach(a=>{if(a.tipo==="injustificada"){inj+=a.dias.length;return;}const k=a.motivo||"Otro";m.set(k,(m.get(k)||0)+a.dias.length);});
+  const arr=[...m.entries()].sort((a,b)=>b[1]-a[1]);
+  const max=Math.max(1,inj,...arr.map(x=>x[1]));
+  if(!inj&&!arr.length)return `<p class="muted" style="margin:0">No hay ausencias en este periodo.</p>`;
+  let h=inj?`<div class="hbar inj num"><span>Sin justificar</span><div class="tr"><span style="width:${inj*100/max}%"></span></div><b>${inj}</b></div>`:"";
+  h+=arr.map(([k,v])=>`<div class="hbar num"><span>${esc(k)}</span><div class="tr"><span style="width:${v*100/max}%"></span></div><b>${v}</b></div>`).join("");
+  return h+`<p class="small muted" style="margin:8px 0 0">En días de ausencia.</p>`;
+}
+document.addEventListener("click",e=>{
+  const a=e.target.closest("[data-ir]");if(a){ir(a.dataset.ir);return;}
+  const p=e.target.closest("[data-preparar]");
+  if(p){$("#c-emp").value=p.dataset.preparar;if(p.dataset.tipo&&p.dataset.tipo!=="null")$("#c-tipo").value=p.dataset.tipo;$("#c-per").value=S.period;sugerencia();ir("comunicados");generar();}
+});
+
+/* ---------- AJUSTES ---------- */
+function llenarCfg(){
+  const c=cfg();
+  const set=(id,v,prop)=>{const el=$(id);if(document.activeElement!==el)el[prop||"value"]=v;};
+  set("#cfg-seg",c.umbralSeg);set("#cfg-com",c.umbralCom);set("#cfg-jus",c.umbralJust);set("#cfg-sab",!!c.sabados,"checked");
+}
+$("#cfg-guardar").addEventListener("click",()=>{
+  const n=id=>Math.max(1,parseInt($(id).value,10)||1);
+  let seg=n("#cfg-seg"),com=n("#cfg-com");if(com<seg)com=seg;
+  guardarCfg({umbralSeg:seg,umbralCom:com,umbralJust:n("#cfg-jus"),sabados:$("#cfg-sab").checked}).then(()=>toast("Ajustes guardados")).catch(fallo);
+});
+$("#exportar").addEventListener("click",async()=>{
+  const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+  const lines=[["Empleado","Documento","Área","Desde","Hasta","Días","Tipo","Motivo","Soporte","Observaciones"].map(q).join(";")];
+  [...S.abs].sort((a,b)=>a.desde.localeCompare(b.desde)).forEach(a=>{const e=empById(a.empleadoId)||{};
+    lines.push([e.nombre,e.documento,e.area,a.desde,a.hasta||a.desde,diasDe(a).length,a.tipo==="injustificada"?"Sin justificar":"Justificada",a.tipo==="justificada"?a.motivo:"",a.tipo==="justificada"?(a.soporte?"Sí":"No"):"",a.obs].map(q).join(";"));});
+  const data="\uFEFF"+lines.join("\r\n");
+  if(!downloads){toast("La descarga no está disponible en esta vista.");return;}
+  try{await downloads.save({filename:"ausencias-"+hoy()+".csv",data});}catch(e){if(e&&e.code!=="declined")toast("No se pudo descargar el archivo.");}
+});
+
+/* ---------- REGISTRAR ---------- */
+let editAus=null;
+function opcionesEmp(sel,{todos,soloActivos}={}){
+  const el=$(sel);const v=el.value;
+  const lista=S.emp.filter(e=>!soloActivos||e.activo!==false||e.id===v).sort(nombreOrd);
+  el.innerHTML=(todos?`<option value="">${todos}</option>`:(lista.length?"":`<option value="">Agrega empleados primero</option>`))+lista.map(e=>`<option value="${esc(e.id)}">${esc(e.nombre)}${e.activo===false?" (inactivo)":""}</option>`).join("");
+  if([...el.options].some(o=>o.value===v))el.value=v;
+}
+function tipoSel(){return document.querySelector('input[name="a-tipo"]:checked').value;}
+function toggleJus(){$("#a-jus-campos").style.display=tipoSel()==="justificada"?"grid":"none";}
+$$('input[name="a-tipo"]').forEach(r=>r.addEventListener("change",toggleJus));
+$("#a-desde").addEventListener("change",()=>{const d=$("#a-desde").value,h=$("#a-hasta").value;if(!h||h<d)$("#a-hasta").value=d;});
+function resetAus(){
+  editAus=null;$("#f-aus").reset();$("#a-desde").value=hoy();$("#a-hasta").value=hoy();toggleJus();
+  $("#a-titulo").textContent="Registrar ausencia";$("#a-guardar").textContent="Guardar ausencia";$("#a-cancelar").hidden=true;
+}
+$("#a-cancelar").addEventListener("click",resetAus);
+$("#f-aus").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const emp=$("#a-emp").value,desde=$("#a-desde").value;let hasta=$("#a-hasta").value||desde;
+  if(!emp){toast("Elige un empleado.");return;}
+  if(!desde){toast("Indica la fecha de la ausencia.");return;}
+  if(hasta<desde){toast("La fecha final no puede ser anterior a la inicial.");return;}
+  const choque=S.abs.find(a=>a.empleadoId===emp&&a.id!==editAus&&a.desde<=hasta&&(a.hasta||a.desde)>=desde);
+  if(choque){toast("Ya hay una ausencia registrada para esa persona entre "+fmt(choque.desde)+" y "+fmt(choque.hasta||choque.desde)+".");return;}
+  const tipo=tipoSel();
+  const prev=editAus?S.abs.find(a=>a.id===editAus):null;
+  const data={empleadoId:emp,desde,hasta,tipo,motivo:tipo==="justificada"?$("#a-motivo").value:"",soporte:tipo==="justificada"?$("#a-soporte").checked:false,obs:$("#a-obs").value.trim(),creado:prev&&prev.creado?prev.creado:new Date().toISOString()};
+  const b=$("#a-guardar");b.disabled=true;
+  try{await guardar("ausencias",editAus||nid(),data);toast(editAus?"Ausencia actualizada":"Ausencia guardada");const keep=emp;resetAus();$("#a-emp").value=keep;}catch(err){fallo(err);}
+  b.disabled=false;
+});
+function renderAusencias(){
+  opcionesEmp("#a-emp",{soloActivos:true});opcionesEmp("#fa-emp",{todos:"Todos los empleados"});
+  const fe=$("#fa-emp").value,ft=$("#fa-tipo").value;
+  const lista=S.abs.filter(a=>(!fe||a.empleadoId===fe)&&(!ft||a.tipo===ft)).sort((a,b)=>b.desde.localeCompare(a.desde)).slice(0,200);
+  const box=$("#lista-aus");
+  if(!lista.length){box.innerHTML=`<div class="empty">${S.abs.length?"No hay registros con ese filtro.":"Aún no hay ausencias registradas."}</div>`;return;}
+  box.innerHTML=`<div class="tbl-wrap"><table class="num"><thead><tr><th>Fecha</th><th>Empleado</th><th class="n">Días</th><th>Tipo</th><th>Detalle</th><th></th></tr></thead><tbody>`+
+    lista.map(a=>{const e=empById(a.empleadoId);const n=diasDe(a).length;const rango=(a.hasta&&a.hasta!==a.desde)?fmt(a.desde)+" – "+fmt(a.hasta):fmt(a.desde);
+      const det=a.tipo==="justificada"?esc(a.motivo||"")+(a.soporte?" · con soporte":" · <span class='tag-i'>sin soporte</span>"):"";
+      return `<tr><td style="white-space:nowrap">${rango}</td><td>${esc(e?e.nombre:"(empleado eliminado)")}</td><td class="n">${n}</td>
+        <td>${a.tipo==="injustificada"?'<span class="tag-i">Sin justificar</span>':'<span class="tag-j">Justificada</span>'}</td>
+        <td class="small">${det}${a.obs?`<div class="muted">${esc(a.obs)}</div>`:""}</td>
+        <td style="white-space:nowrap">${a.tipo==="injustificada"?`<button class="btn link sm" data-justificar="${esc(a.id)}">Justificar</button>`:""}<button class="btn link sm" data-edit-aus="${esc(a.id)}">Editar</button><button class="btn link sm danger" data-del-aus="${esc(a.id)}">Eliminar</button></td></tr>`;}).join("")+`</tbody></table></div>`;
+}
+$("#fa-emp").addEventListener("change",renderAusencias);$("#fa-tipo").addEventListener("change",renderAusencias);
+$("#lista-aus").addEventListener("click",async e=>{
+  const ed=e.target.closest("[data-edit-aus],[data-justificar]");
+  if(ed){const id=ed.dataset.editAus||ed.dataset.justificar;const a=S.abs.find(x=>x.id===id);if(!a)return;
+    editAus=id;$("#a-emp").value=a.empleadoId;$("#a-desde").value=a.desde;$("#a-hasta").value=a.hasta||a.desde;
+    const t=ed.dataset.justificar?"justificada":a.tipo;document.querySelector(`input[name="a-tipo"][value="${t}"]`).checked=true;
+    if(a.motivo)$("#a-motivo").value=a.motivo;$("#a-soporte").checked=ed.dataset.justificar?true:!!a.soporte;$("#a-obs").value=a.obs||"";toggleJus();
+    $("#a-titulo").textContent="Editar ausencia";$("#a-guardar").textContent="Guardar cambios";$("#a-cancelar").hidden=false;window.scrollTo(0,0);return;}
+  const d=e.target.closest("[data-del-aus]");
+  if(d){if(!confirm("¿Eliminar este registro de ausencia?"))return;try{await borrar("ausencias",d.dataset.delAus);toast("Registro eliminado");}catch(err){fallo(err);}}
+});
+
+/* ---------- EMPLEADOS ---------- */
+let editEmp=null;
+function resetEmp(){editEmp=null;$("#f-emp").reset();$("#e-guardar").textContent="Agregar empleado";$("#e-cancelar").hidden=true;$("#e-titulo").textContent="Empleados";}
+$("#e-cancelar").addEventListener("click",resetEmp);
+$("#f-emp").addEventListener("submit",async e=>{
+  e.preventDefault();const nombre=$("#e-nombre").value.trim();if(!nombre){toast("Escribe el nombre.");$("#e-nombre").focus();return;}
+  const prev=editEmp?empById(editEmp):null;
+  const data={nombre,documento:$("#e-doc").value.trim(),cargo:$("#e-cargo").value.trim(),area:$("#e-area").value.trim(),correo:$("#e-correo").value.trim(),activo:prev?prev.activo!==false:true};
+  try{await guardar("empleados",editEmp||nid(),data);toast(editEmp?"Datos actualizados":nombre+" agregado");resetEmp();$("#e-nombre").focus();}catch(err){fallo(err);}
+});
+$("#e-lote-btn").addEventListener("click",async()=>{
+  const lineas=$("#e-lote").value.split(/\r?\n/).map(l=>l.trim()).filter(Boolean);
+  if(!lineas.length){toast("Pega al menos un nombre.");return;}
+  const ex=new Set(S.emp.map(e=>String(e.nombre).toLowerCase()));let n=0,rep=0;
+  for(const l of lineas){const p=l.split(/[;\t]/).map(x=>x.trim());if(!p[0])continue;if(ex.has(p[0].toLowerCase())){rep++;continue;}
+    try{await guardar("empleados",nid(),{nombre:p[0],cargo:p[1]||"",area:p[2]||"",correo:p[3]||"",documento:"",activo:true});ex.add(p[0].toLowerCase());n++;}catch(err){fallo(err);break;}}
+  $("#e-lote").value="";toast(n+" agregados"+(rep?", "+rep+" ya existían":""));
+});
+function renderEmpleados(){
+  const box=$("#lista-emp");
+  if(!S.emp.length){box.innerHTML=`<div class="empty">Agrega a la primera persona con el formulario de arriba.</div>`;return;}
+  const A=analizar(S.period);const m=new Map(A.filas.map(r=>[r.emp.id,r]));
+  const lista=[...S.emp].sort((a,b)=>(a.activo===false)-(b.activo===false)||nombreOrd(a,b));
+  box.innerHTML=`<p class="small muted" style="margin:0 0 8px">${S.emp.filter(e=>e.activo!==false).length} activos · conteos de: ${PER[S.period].toLowerCase()}</p><div class="tbl-wrap"><table class="num"><thead><tr><th>Nombre</th><th>Cargo y área</th><th>Correo</th><th class="n">Sin justificar</th><th class="n">Justificadas</th><th></th></tr></thead><tbody>`+
+    lista.map(e=>{const r=m.get(e.id);const tiene=S.abs.some(a=>a.empleadoId===e.id);
+      return `<tr${e.activo===false?' class="muted"':""}><td><b>${esc(e.nombre)}</b>${e.documento?`<div class="small muted">${esc(e.documento)}</div>`:""}${e.activo===false?'<div class="small">Inactivo</div>':""}</td>
+      <td>${esc([e.cargo,e.area].filter(Boolean).join(" · "))}</td><td class="small">${esc(e.correo||"")}</td>
+      <td class="n ${r&&r.inj.length?"tag-i":""}">${r?r.inj.length:0}</td><td class="n">${r?r.jus.length:0}</td>
+      <td style="white-space:nowrap"><button class="btn link sm" data-edit-emp="${esc(e.id)}">Editar</button><button class="btn link sm" data-act-emp="${esc(e.id)}">${e.activo===false?"Reactivar":"Desactivar"}</button>${tiene?"":`<button class="btn link sm danger" data-del-emp="${esc(e.id)}">Eliminar</button>`}</td></tr>`;}).join("")+`</tbody></table></div>`;
+}
+$("#lista-emp").addEventListener("click",async e=>{
+  const ed=e.target.closest("[data-edit-emp]");
+  if(ed){const x=empById(ed.dataset.editEmp);if(!x)return;editEmp=x.id;$("#e-nombre").value=x.nombre||"";$("#e-doc").value=x.documento||"";$("#e-cargo").value=x.cargo||"";$("#e-area").value=x.area||"";$("#e-correo").value=x.correo||"";
+    $("#e-guardar").textContent="Guardar cambios";$("#e-cancelar").hidden=false;$("#e-titulo").textContent="Editar empleado";window.scrollTo(0,0);$("#e-nombre").focus();return;}
+  const ac=e.target.closest("[data-act-emp]");
+  if(ac){const x=empById(ac.dataset.actEmp);if(!x)return;try{await guardar("empleados",x.id,Object.assign(limpio(x),{activo:x.activo===false}));}catch(err){fallo(err);}return;}
+  const d=e.target.closest("[data-del-emp]");
+  if(d){const x=empById(d.dataset.delEmp);if(!x||!confirm("¿Eliminar a "+x.nombre+"?"))return;try{await borrar("empleados",x.id);toast("Empleado eliminado");}catch(err){fallo(err);}}
+});
+
+/* ---------- COMUNICADOS ---------- */
+function llenarPerCom(){const el=$("#c-per");if(el.options.length)return;el.innerHTML=Object.keys(PER).map(k=>`<option value="${k}">${PER[k]}</option>`).join("");el.value=S.period;}
+function sugerencia(){
+  const id=$("#c-emp").value;const p=$("#c-per").value||S.period;const el=$("#c-sugerencia");
+  if(!id){el.textContent="";return;}
+  const r=analizar(p).filas.find(x=>x.emp.id===id);if(!r){el.textContent="";return;}
+  const u=ultimoCom(id);
+  el.textContent=`${r.emp.nombre}: ${r.inj.length} sin justificar y ${r.jus.length} justificadas en el periodo. `+(r.est.tipo?`Sugerido: ${TIPOS[r.est.tipo].toLowerCase()}.`:"No supera ningún umbral de alerta.")+(u?` Último comunicado: ${TIPOS[u.tipo]||u.tipo}, ${fmt(u.fecha)}.`:"");
+}
+$("#c-emp").addEventListener("change",sugerencia);$("#c-per").addEventListener("change",sugerencia);
+function listaFechas(items,conMotivo){
+  if(!items.length)return "  (No hay registros de este tipo en el periodo seleccionado.)";
+  return items.map(a=>{const n=a.dias.length;const r=(a.hasta&&a.hasta!==a.desde)?`del ${fmtL(a.desde)} al ${fmtL(a.hasta)}`:fmtL(a.desde);
+    return `  • ${r.charAt(0).toUpperCase()+r.slice(1)} (${n} ${n===1?"día":"días"})${conMotivo&&a.motivo?" – "+a.motivo:""}`;}).join("\n");
+}
+function carta(empId,tipo,p){
+  const c=cfg();const A=analizar(p);const r=A.filas.find(x=>x.emp.id===empId);if(!r)return {asunto:"",texto:""};
+  const e=r.emp;const pn=String(e.nombre||"").split(/\s+/)[0];
+  const desde=p==="todo"?(([...r.inj,...r.jus].map(a=>a.desde).sort()[0])||hoy()):A.ini;
+  const sinDia=x=>fmtL(x).replace(/^\S+ /,"");const rango=`entre el ${sinDia(desde)} y el ${sinDia(hoy())}`;
+  const firma=`
+
+Atentamente,
+
+Talento Humano`;
+  let asunto,cuerpo;
+  if(tipo==="descargos"){
+    asunto="Citación a diligencia de descargos por inasistencias sin justificar";
+    cuerpo=`Respetado(a) ${pn}:
+
+Por medio de la presente, el área de Talento Humano le informa que en los registros de asistencia de la empresa figuran las siguientes inasistencias a su jornada laboral, ocurridas ${rango}, sin que a la fecha se haya presentado una justificación o un soporte que las respalde:
+
+${listaFechas(r.inj)}
+
+En total: ${r.inj.length} ${r.inj.length===1?"inasistencia":"inasistencias"}, equivalentes a ${r.dInj} ${r.dInj===1?"día":"días"} de trabajo.
+
+Cumplir la jornada y avisar oportunamente cualquier ausencia es una obligación del contrato de trabajo y del Reglamento Interno de Trabajo. Por esta razón, y en garantía de su derecho al debido proceso, lo(a) citamos a una diligencia de descargos que se realizará el día ______ de __________ a las ______, en ____________________, para que exponga las razones de estas ausencias y aporte las pruebas que considere pertinentes.
+
+Puede asistir acompañado(a) en los términos que establece el Reglamento Interno de Trabajo. Si cuenta con soportes que justifiquen alguna de estas fechas, le pedimos entregarlos a Talento Humano antes de la diligencia.`;
+  }else if(tipo==="justificadas"){
+    asunto="Seguimiento a sus ausencias justificadas";
+    cuerpo=`Respetado(a) ${pn}:
+
+Desde Talento Humano hacemos seguimiento al ausentismo de todo el equipo, con el propósito de cuidar el bienestar de las personas y la continuidad del trabajo. ${rango.charAt(0).toUpperCase()+rango.slice(1)} hemos registrado las siguientes ausencias justificadas a su nombre:
+
+${listaFechas(r.jus,true)}
+
+En total: ${r.jus.length} ${r.jus.length===1?"ausencia":"ausencias"} (${r.dJus} ${r.dJus===1?"día":"días"}).
+
+Le agradecemos haber informado y soportado cada una de ellas. Dado el número de ausencias, queremos invitarle a una conversación con Talento Humano para saber cómo se encuentra y revisar si necesita algún apoyo, por ejemplo orientación con su EPS, ajustes en su puesto o en sus condiciones de trabajo, o el acompañamiento del área de Seguridad y Salud en el Trabajo.
+
+Por favor indíquenos qué día y hora de esta semana le queda bien. Esta conversación no tiene carácter disciplinario.`;
+  }else{
+    asunto="Recordatorio sobre la asistencia y el reporte de ausencias";
+    cuerpo=`Respetado(a) ${pn}:
+
+Desde Talento Humano queremos recordarle la importancia de cumplir con su jornada laboral y de informar a tiempo cualquier ausencia. En nuestros registros aparecen las siguientes fechas sin justificación, ${rango}:
+
+${listaFechas(r.inj)}
+
+Si se presenta una situación que le impida asistir, le pedimos avisar a su jefe inmediato antes del inicio de la jornada y entregar el soporte correspondiente a Talento Humano tan pronto como le sea posible. Si cuenta con soportes para alguna de las fechas anteriores, puede hacérnoslos llegar para actualizar su registro.
+
+Si hay alguna situación personal o laboral que esté afectando su asistencia, nuestra área está disponible para escucharle y buscar alternativas. Contamos con su compromiso.`;
+  }
+  return {asunto,texto:cuerpo+firma};
+}
+let enCurso=null;
+function generar(){
+  const id=$("#c-emp").value;if(!id){toast("Elige un empleado.");return;}
+  if(enCurso){enCurso.abort();enCurso=null;}
+  const k=carta(id,$("#c-tipo").value,$("#c-per").value||S.period);
+  $("#c-asunto").value=k.asunto;$("#c-texto").value=k.texto;
+  $("#c-editor").hidden=false;actGmail();$("#c-mejorar").textContent="Mejorar redacción con Claude";
+}
+$("#c-generar").addEventListener("click",generar);
+function actGmail(){
+  const e=empById($("#c-emp").value);const to=(e&&e.correo)||"";
+  $("#c-para").value=to?(e.nombre+" <"+to+">"):"Esta persona no tiene correo registrado";
+  $("#c-gmail").href="https://mail.google.com/mail/?view=cm&fs=1&to="+encodeURIComponent(to)+"&su="+encodeURIComponent($("#c-asunto").value)+"&body="+encodeURIComponent($("#c-texto").value);
+}
+$("#c-asunto").addEventListener("input",actGmail);$("#c-texto").addEventListener("input",actGmail);$("#c-emp").addEventListener("change",actGmail);
+$("#c-copiar").addEventListener("click",async()=>{
+  const t=$("#c-texto");
+  try{await navigator.clipboard.writeText(t.value);toast("Texto copiado");}
+  catch(e){t.select();try{document.execCommand("copy");toast("Texto copiado");}catch(_){toast("Selecciona el texto y cópialo manualmente.");}}
+});
+$("#c-descargar").addEventListener("click",async()=>{
+  if(!downloads)return;const e=empById($("#c-emp").value);
+  const nom=(e?e.nombre:"comunicado").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"-").toLowerCase();
+  try{await downloads.save({filename:`comunicado-${nom}-${hoy()}.txt`,data:$("#c-texto").value});}catch(err){if(err&&err.code!=="declined")toast("No se pudo descargar.");}
+});
+$("#c-registrar").addEventListener("click",async()=>{
+  const id=$("#c-emp").value;const texto=$("#c-texto").value;if(!id||!texto.trim())return;
+  try{await guardar("comunicados",nid(),{empleadoId:id,tipo:$("#c-tipo").value,fecha:hoy(),asunto:$("#c-asunto").value,texto,creado:new Date().toISOString()});toast("Comunicado registrado en el historial");}catch(err){fallo(err);}
+});
+function renderComunicados(){
+  opcionesEmp("#c-emp",{soloActivos:true});llenarPerCom();sugerencia();
+  $("#c-descargar").hidden=false;
+  const box=$("#c-hist");
+  const lista=[...S.com].sort((a,b)=>String(b.creado||b.fecha).localeCompare(String(a.creado||a.fecha)));
+  if(!lista.length){box.innerHTML=`<p class="muted" style="margin:0">Cuando registres un comunicado como enviado, aparecerá aquí.</p>`;return;}
+  box.innerHTML=lista.map(c=>{const e=empById(c.empleadoId);return `<div class="hist-item"><div class="row spread"><div><b>${esc(e?e.nombre:"(empleado eliminado)")}</b> <span class="muted">· ${esc(TIPOS[c.tipo]||c.tipo)} · ${fmt(c.fecha)}</span></div>
+    <div><button class="btn link sm" data-ver-com="${esc(c.id)}">Ver texto</button><button class="btn link sm danger" data-del-com="${esc(c.id)}">Eliminar</button></div></div></div>`;}).join("");
+}
+$("#c-hist").addEventListener("click",async e=>{
+  const v=e.target.closest("[data-ver-com]");
+  if(v){const c=S.com.find(x=>x.id===v.dataset.verCom);if(!c)return;$("#c-emp").value=c.empleadoId;$("#c-tipo").value=c.tipo;$("#c-asunto").value=c.asunto||"";$("#c-texto").value=c.texto;actGmail();$("#c-editor").hidden=false;window.scrollTo(0,0);return;}
+  const d=e.target.closest("[data-del-com]");
+  if(d){if(!confirm("¿Eliminar este comunicado del historial?"))return;try{await borrar("comunicados",d.dataset.delCom);}catch(err){fallo(err);}}
+});
+
+/* ---------- render global ---------- */
+function render(){
+  llenarCfg();renderResumen();renderAusencias();renderEmpleados();renderComunicados();
+}
+const CLAVE="asistencia-partikle-v1";
+let almacenOk=true;
+function persistir(){
+  if(!almacenOk)return;
+  try{localStorage.setItem(CLAVE,JSON.stringify({version:1,emp:S.emp,abs:S.abs,com:S.com,cfg:S.cfg}));}
+  catch(e){toast("No se pudo guardar en el navegador.");}
+}
+function cargar(){
+  try{
+    const raw=localStorage.getItem(CLAVE);
+    if(raw){const d=JSON.parse(raw);aplicar(d);}
+    return true;
+  }catch(e){console.error(e);return false;}
+}
+function aplicar(d){
+  S.emp=Array.isArray(d.emp)?d.emp:[];S.abs=Array.isArray(d.abs)?d.abs:[];S.com=Array.isArray(d.com)?d.com:[];
+  S.cfg=Object.assign({},DEF_CFG,d.cfg||{});
+}
+downloads={save:({filename,data})=>{
+  const blob=data instanceof Blob?data:new Blob([data],{type:filename.endsWith(".csv")?"text/csv;charset=utf-8":filename.endsWith(".json")?"application/json":"text/plain;charset=utf-8"});
+  const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},1000);return Promise.resolve();
+}};
+function mostrarRespaldo(){
+  let t="";try{t=localStorage.getItem(CLAVE+"-respaldo")||"";}catch(e){}
+  $("#ultimo-respaldo").textContent=t?"Última copia descargada: "+fmt(t):"Aún no has descargado ninguna copia.";
+}
+$("#respaldo-bajar").addEventListener("click",()=>{
+  downloads.save({filename:"respaldo-asistencia-"+hoy()+".json",data:JSON.stringify({version:1,fecha:hoy(),emp:S.emp,abs:S.abs,com:S.com,cfg:S.cfg},null,2)});
+  try{localStorage.setItem(CLAVE+"-respaldo",hoy());}catch(e){}mostrarRespaldo();
+});
+$("#respaldo-subir").addEventListener("change",async e=>{
+  const f=e.target.files[0];e.target.value="";if(!f)return;
+  try{
+    const d=JSON.parse(await f.text());
+    if(!d||!Array.isArray(d.emp))throw new Error("formato");
+    const hay=S.emp.length||S.abs.length;
+    if(hay&&!confirm("Esto reemplazará los datos actuales de este navegador por los de la copia ("+d.emp.length+" empleados, "+(d.abs||[]).length+" ausencias). ¿Continuar?"))return;
+    aplicar(d);persistir();render();toast("Copia restaurada");
+  }catch(err){toast("El archivo no es una copia de seguridad válida.");}
+});
+function modo(vivo){
+  const el=$("#estado-guardado");
+  el.classList.toggle("off",!vivo);
+  el.innerHTML=`<span class="dot"></span>`+(vivo?"Guardado en este navegador":"Sin guardar");
+  $("#nota-memoria").classList.toggle("on",!vivo);
+}
+function iniciar(){
+  almacenOk=cargar();
+  try{localStorage.setItem(CLAVE+"-prueba","1");localStorage.removeItem(CLAVE+"-prueba");}catch(e){almacenOk=false;}
+  modo(almacenOk);
+  resetAus();llenarPerCom();ir(location.hash.slice(1)||"resumen",false);render();mostrarRespaldo();
+}
+iniciar();
+})();
+</script>
+</body>
+</html>
